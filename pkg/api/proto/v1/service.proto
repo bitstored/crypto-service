@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package crypto_service;
+option go_package="pb";
+
+message File {
+    bytes content = 1;
+    bytes secret_phrase = 2;
+}
+message EncryptFileRequest {
+    File original_file = 1;
+    string user_id = 2;
+}
+message EncryptFileResponse {
+    int32 response_code = 1;
+    string response_message = 2;
+    bytes encrypted_data = 3;
+}
+message DecryptFileRequest {
+    File encrypted_file = 1;
+    string user_id = 2;
+    bytes secret_phrase = 3;
+}
+message DecryptFileResponse {
+    int32 response_code = 1;
+    string response_message = 2;
+    bytes original_data = 3;
+}
+message EncryptPasswordRequest {
+    bytes password = 1;
+    int32 iteration_count = 2;
+    bytes salt = 3;
+}
+message EncryptPasswordResponse {
+    int32 response_code = 1;
+    string response_message = 2;
+    bytes password = 3;
+}
+message EncryptRequest {
+    bytes data = 1;
+}
+message EncryptResponse {
+    int32 response_code = 1;
+    string response_message = 2;
+    bytes data = 3;
+}
+message DecryptRequest {
+    bytes data = 1;
+}
+message DecryptResponse {
+    int32 response_code = 1;
+    string response_message = 2;
+    bytes data = 3;
+}
+service Crypto {
+    rpc EncryptFile(EncryptFileRequest) returns (EncryptFileResponse) {}
+    rpc DecryptFile(DecryptFileRequest) returns (DecryptFileResponse) {}
+    rpc EncryptPassword(EncryptPasswordRequest) returns (EncryptPasswordResponse) {}
+    rpc Encrypt(EncryptRequest) returns(EncryptResponse) {}
+    rpc Decrypt(DecryptRequest) returns(DecryptResponse) {}
+}
