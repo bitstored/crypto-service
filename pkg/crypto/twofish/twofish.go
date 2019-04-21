@@ -35,7 +35,7 @@ func NewCipher(key []byte) (*Cipher, error) {
 	k := keylen / wordSize
 
 	// Create the S[..] words
-	var S [4 * 4]byte
+	var S [8 * 8]byte
 	for i := 0; i < k; i++ {
 		// Computes [y0 y1 y2 y3] = rs . [x0 x1 x2 x3 x4 x5 x6 x7]
 		for j, rsRow := range rs {
@@ -47,7 +47,7 @@ func NewCipher(key []byte) (*Cipher, error) {
 
 	// Calculate subkeys
 	c := new(Cipher)
-	var tmp [4]byte
+	var tmp [8]byte
 	for i := byte(0); i < 20; i++ {
 		// A = h(p * 2x, Me)
 		for j := range tmp {
@@ -83,6 +83,13 @@ func NewCipher(key []byte) (*Cipher, error) {
 			c.s[1][i] = mdsColumnMult(sbox[0][sbox[0][sbox[1][sbox[1][byte(i)]^S[1]]^S[5]]^S[9]], 1)
 			c.s[2][i] = mdsColumnMult(sbox[1][sbox[1][sbox[0][sbox[0][byte(i)]^S[2]]^S[6]]^S[10]], 2)
 			c.s[3][i] = mdsColumnMult(sbox[0][sbox[1][sbox[1][sbox[0][byte(i)]^S[3]]^S[7]]^S[11]], 3)
+		}
+	case 8:
+		for i := range c.s[0] {
+			c.s[0][i] = mdsColumnMult(sbox[1][sbox[0][sbox[0][sbox[1][sbox[1][sbox[0][sbox[0][byte(i)]^S[0]]^S[4]]^S[8]]^S[12]]^S[16]]^S[20]], 0)
+			c.s[1][i] = mdsColumnMult(sbox[0][sbox[0][sbox[1][sbox[1][sbox[0][sbox[0][sbox[1][byte(i)]^S[1]]^S[5]]^S[9]]^S[13]]^S[17]]^S[21]], 1)
+			c.s[2][i] = mdsColumnMult(sbox[1][sbox[1][sbox[0][sbox[0][sbox[0][sbox[1][sbox[0][byte(i)]^S[2]]^S[6]]^S[10]]^S[14]]^S[18]]^S[22]], 2)
+			c.s[3][i] = mdsColumnMult(sbox[0][sbox[1][sbox[1][sbox[0][sbox[1][sbox[1][sbox[1][byte(i)]^S[3]]^S[7]]^S[11]]^S[15]]^S[19]]^S[23]], 3)
 		}
 	default:
 		for i := range c.s[0] {
@@ -214,6 +221,12 @@ func h(in, key []byte, offset int) uint32 {
 		y[x] = in[x]
 	}
 	switch len(key) / 8 {
+	case 8:
+		y[0] = sbox[0][y[0]] ^ key[4*(8+offset)+0]
+		y[1] = sbox[1][y[1]] ^ key[4*(8+offset)+1]
+		y[2] = sbox[0][y[2]] ^ key[4*(8+offset)+2]
+		y[3] = sbox[1][y[3]] ^ key[4*(8+offset)+3]
+		fallthrough
 	case 4:
 		y[0] = sbox[1][y[0]] ^ key[4*(6+offset)+0]
 		y[1] = sbox[0][y[1]] ^ key[4*(6+offset)+1]

@@ -123,3 +123,51 @@ func TestCipher(t *testing.T) {
 		}
 	}
 }
+
+var testVectors64Bbytes = []struct {
+	key []byte
+	msg []byte
+}{
+	// These tests are extracted from LibTom
+	{
+		[]byte{0x9F, 0x58, 0x9F, 0x5C, 0xF6, 0x12, 0x2C, 0x32, 0xB6, 0xBF, 0xEC, 0x2F, 0x2A, 0xE8, 0xC3, 0x5A,
+			0x9F, 0x58, 0x9F, 0x5C, 0xF6, 0x12, 0x2C, 0x32, 0xB6, 0xBF, 0xEC, 0x2F, 0x2A, 0xE8, 0xC3, 0x5A,
+			0x9F, 0x58, 0x9F, 0x5C, 0xF6, 0x12, 0x2C, 0x32, 0xB6, 0xBF, 0xEC, 0x2F, 0x2A, 0xE8, 0xC3, 0x5A,
+			0x9F, 0x58, 0x9F, 0x5C, 0xF6, 0x12, 0x2C, 0x32, 0xB6, 0xBF, 0xEC, 0x2F, 0x2A, 0xE8, 0xC3, 0x5A},
+		[]byte{0x01, 0x9F, 0x98, 0x09, 0xDE, 0x17, 0x11, 0x85, 0x8F, 0xAA, 0xC3, 0xA3, 0xBA, 0x20, 0xFB, 0xC3},
+	}}
+
+func TestCipher64ByteKey(t *testing.T) {
+	for n, tt := range testVectors64Bbytes {
+		// Test if the plaintext (dec) is encrypts to the given
+		// ciphertext (enc) using the given key. Test also if enc can
+		// be decrypted again into dec.
+		c, err := NewCipher(tt.key)
+		if err != nil {
+			t.Errorf("#%d: NewCipher: %v", n, err)
+			return
+		}
+
+		enc := make([]byte, 16)
+		c.Encrypt(enc, tt.msg)
+		dec := make([]byte, 16)
+		c.Decrypt(dec, enc)
+		if !bytes.Equal(dec, tt.msg) {
+			t.Errorf("#%d: decrypt = %x want %x", n, dec, tt.msg)
+		}
+
+		// Test that 16 zero bytes, encrypted 1000 times then decrypted
+		// 1000 times results in zero bytes again.
+		zero := make([]byte, 16)
+		buf := make([]byte, 16)
+		for i := 0; i < 1000; i++ {
+			c.Encrypt(buf, buf)
+		}
+		for i := 0; i < 1000; i++ {
+			c.Decrypt(buf, buf)
+		}
+		if !bytes.Equal(buf, zero) {
+			t.Errorf("#%d: encrypt/decrypt 1000: have %x want %x", n, buf, zero)
+		}
+	}
+}
