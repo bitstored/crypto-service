@@ -1,0 +1,41 @@
+apiVersion: "extensions/v1beta1"
+kind: "Deployment"
+metadata:
+  name: "crypto-service"
+  namespace: "default"
+  labels:
+    app: "crypto-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "crypto-service"
+  template:
+    metadata:
+      labels:
+        app: "crypto-service"
+    spec:
+      containers:
+        - name: "crypto-service-latest"
+          image: "gcr.io/licenta-diana/crypto-service"
+          imagePullPolicy: "Always"
+---
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "crypto-service-hpa"
+  namespace: "default"
+  labels:
+    app: "crypto-service"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "crypto-service"
+    apiVersion: "apps/v1beta1"
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: "Resource"
+      resource:
+        name: "cpu"
+        targetAverageUtilization: 80

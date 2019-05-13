@@ -38,6 +38,7 @@ message EncryptPasswordResponse {
 }
 message EncryptRequest {
     bytes data = 1;
+    bytes salt = 2;
 }
 message EncryptResponse {
     int32 response_code = 1;
@@ -46,6 +47,7 @@ message EncryptResponse {
 }
 message DecryptRequest {
     bytes data = 1;
+    bytes salt = 2;
 }
 message DecryptResponse {
     int32 response_code = 1;
