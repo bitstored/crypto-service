@@ -83,7 +83,7 @@ func main() {
 		}
 	}()
 
-	fmt.Printf("Compression server listening on  %s for gRPC\n", *grpcAddr)
+	fmt.Printf("Crypto server listening on  %s for gRPC\n", *grpcAddr)
 
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
