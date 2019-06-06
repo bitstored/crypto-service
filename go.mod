@@ -2,7 +2,6 @@ module github.com/bitstored/crypto-service
 
 require (
 	github.com/bitstored/watermarking-service v0.0.0-20190512111722-0790c2c63695 // indirect
-	github.com/cenkalti/backoff v2.1.1+incompatible
 	github.com/golang/protobuf v1.3.1
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/prometheus/client_golang v0.9.2

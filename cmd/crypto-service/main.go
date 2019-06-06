@@ -14,7 +14,6 @@ import (
 	"github.com/bitstored/crypto-service/pb"
 	"github.com/bitstored/crypto-service/pkg/server"
 	"github.com/bitstored/crypto-service/pkg/service"
-	"github.com/cenkalti/backoff"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -23,13 +22,13 @@ import (
 )
 
 const (
-	ServiceName = "authentication"
+	ServiceName = "crypto"
 )
 
 var (
 	grpcAddr = flag.String("grpc", "localhost:4004", "gRPC API address")
-	cert     = flag.String("cert", "scripts/localhost.pem", "certificate pathname")
-	certKey  = flag.String("certkey", "scripts/localhost.key", "private key pathname")
+	// cert     = flag.String("cert", "scripts/localhost.pem", "certificate pathname")
+	// certKey  = flag.String("certkey", "scripts/localhost.key", "private key pathname")
 )
 
 func main() {
@@ -96,8 +95,4 @@ func main() {
 	}()
 	// Wait for signal
 	<-done
-}
-
-func retry(ctx context.Context, f func() error) error {
-	return backoff.Retry(f, backoff.WithContext(backoff.NewExponentialBackOff(), ctx))
 }
