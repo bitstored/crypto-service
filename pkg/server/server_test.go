@@ -44,7 +44,22 @@ func TestServer_EncryptFile(t *testing.T) {
 		want    *pb.EncryptFileResponse
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "OK",
+			fields: fields{
+				cryptoService: service.NewCryptoService(),
+			},
+			args: args{
+				ctx: context.Background(),
+				in: &pb.EncryptFileRequest{
+					OriginalFile: &pb.File{
+						Content:      []byte("ana"),
+						SecretPhrase: []byte("ana1"),
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -56,8 +71,14 @@ func TestServer_EncryptFile(t *testing.T) {
 				t.Errorf("Server.EncryptFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Server.EncryptFile() = %v, want %v", got, tt.want)
+			got1, err := s.DecryptFile(tt.args.ctx, &pb.DecryptFileRequest{
+				EncryptedFile: &pb.File{
+					Content:      got.EncryptedData,
+					SecretPhrase: tt.args.in.GetOriginalFile().GetSecretPhrase(),
+				},
+			})
+			if !reflect.DeepEqual(tt.args.in.GetOriginalFile().GetContent(), got1.GetOriginalData()) {
+				t.Errorf("Server.EncryptFile() = %v, want %v", tt.args.in.GetOriginalFile().Content, got1.GetOriginalData())
 			}
 		})
 	}

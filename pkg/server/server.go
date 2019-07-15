@@ -27,7 +27,18 @@ func (s *Server) EncryptFile(ctx context.Context, in *pb.EncryptFileRequest) (*p
 		return nil, status.Error(codes.InvalidArgument, "file is empty")
 	}
 
-	hash, err := s.cryptoService.EncryptFile(ctx, file.GetContent(), file.GetSecretPhrase())
+	phrase := file.GetSecretPhrase()
+	if len(phrase) > 32 {
+		phrase = phrase[0:32]
+	} else {
+		elems := make([]byte, 32-len(phrase))
+		phrase = append(phrase, elems...)
+	}
+	content := file.GetContent()
+	diff := 16 - len(content)
+	app := make([]byte, diff)
+	content = append(content, app...)
+	hash, err := s.cryptoService.EncryptFile(ctx, content, phrase)
 
 	if err != nil {
 		return nil, err
@@ -47,8 +58,18 @@ func (s *Server) DecryptFile(ctx context.Context, in *pb.DecryptFileRequest) (*p
 		return nil, status.Error(codes.InvalidArgument, "file is empty")
 	}
 
-	data, err := s.cryptoService.DecryptFile(ctx, file.GetContent(), file.GetSecretPhrase())
-
+	phrase := file.GetSecretPhrase()
+	if len(phrase) > 32 {
+		phrase = phrase[0:32]
+	} else {
+		elems := make([]byte, 32-len(phrase))
+		phrase = append(phrase, elems...)
+	}
+	content := file.GetContent()
+	diff := 16 - len(content)
+	app := make([]byte, diff)
+	content = append(content, app...)
+	data, err := s.cryptoService.DecryptFile(ctx, content, phrase)
 	if err != nil {
 		return nil, err
 	}
